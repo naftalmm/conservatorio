@@ -100,7 +100,7 @@ class Post(object):
         post["_tags"] = meta.get("tags", [])
 
         # Retrieve the root comment
-        self.openingPostIdentifier, self.category = self._getOpeningPost()
+        self.openingPostIdentifier, self.category = self._getOpeningPost(post)
 
         # Total reward
         post["total_payout_reward"] = "%.3f SBD" % (
@@ -112,11 +112,11 @@ class Post(object):
         for key in post:
             setattr(self, key, post[key])
 
-    def _getOpeningPost(self):
+    def _getOpeningPost(self, post):
         m = re.match("/([^/]*)/@([^/]*)/([^#]*).*",
-                     getattr(self, "url", ""))
+                     post.get("url", ""))
         if not m:
-            return None, None
+            return "", ""
         else:
             category = m.group(1)
             author = m.group(2)
