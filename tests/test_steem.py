@@ -81,7 +81,7 @@ class Testcases(unittest.TestCase) :
 
     def test_transfer(self):
         try:
-            steem.transfer("fabian", 10, "STEEM", account=testaccount)
+            steem.transfer("fabian", 10, "GOLOS", account=testaccount)
         except InsufficientAuthorityError:
             pass
         except MissingKeyError:

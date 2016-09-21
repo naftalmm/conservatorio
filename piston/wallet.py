@@ -7,7 +7,7 @@ import logging
 from .wallet_legacy import LegacyWallet
 
 log = logging.getLogger(__name__)
-prefix = "STM"
+prefix = "GLS"
 # prefix = "TST"
 
 
@@ -97,7 +97,7 @@ class Wallet(LegacyWallet):
                 key = PrivateKey(wif)
             except:
                 raise InvalidWifError
-            self.keys[format(key.pubkey, "STM")] = str(key)
+            self.keys[format(key.pubkey, "GLS")] = str(key)
 
     def unlock(self, pwd=None):
         """ Unlock the wallet database

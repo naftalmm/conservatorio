@@ -19,7 +19,7 @@ from steemexchange.exchange import SteemExchange as SteemLibExchange
 import logging
 log = logging.getLogger(__name__)
 
-prefix = "STM"
+prefix = "GLS"
 # prefix = "TST"
 
 STEEMIT_100_PERCENT = 10000
@@ -115,9 +115,9 @@ class Post(object):
         self.openingPostIdentifier, self.category = self._getOpeningPost()
 
         # Total reward
-        post["total_payout_reward"] = "%.3f SBD" % (
-            float(post.get("total_payout_value", "0 SBD").split(" ")[0]) +
-            float(post.get("total_pending_payout_value", "0 SBD").split(" ")[0])
+        post["total_payout_reward"] = "%.3f GBG" % (
+            float(post.get("total_payout_value", "0 GBG").split(" ")[0]) +
+            float(post.get("total_pending_payout_value", "0 GBG").split(" ")[0])
         )
 
         # Store everything as attribute
@@ -860,7 +860,7 @@ class Steem(object):
         if not account:
             raise ValueError("You need to provide an account")
 
-        assert asset == "SBD" or asset == "STEEM"
+        assert asset == "GBG" or asset == "GOLOS"
 
         if memo and memo[0] == "#":
             from steembase import memo as Memo
@@ -906,7 +906,7 @@ class Steem(object):
                "vesting_shares": '{:.{prec}f} {asset}'.format(
                    float(amount),
                    prec=6,
-                   asset="VESTS"
+                   asset="GESTS"
                ),
                }
         )
@@ -938,7 +938,7 @@ class Steem(object):
                "amount": '{:.{prec}f} {asset}'.format(
                    float(amount),
                    prec=3,
-                   asset="STEEM"
+                   asset="GOLOS"
                ),
                }
         )
@@ -966,7 +966,7 @@ class Steem(object):
                "amount": '{:.{prec}f} {asset}'.format(
                    float(amount),
                    prec=3,
-                   asset="SBD"
+                   asset="GBG"
                )}
         )
 

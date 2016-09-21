@@ -223,7 +223,7 @@ Transfer Steem
 
 STEEM can be transfered via::
 
-    piston transfer receipient "100.000 STEEM"
+    piston transfer receipient "100.000 GOLOS"
 
 If ``--author`` is not provided, the *default* account as defined with
 ``piston set author`` will be taken.
@@ -233,8 +233,8 @@ Powerup/Powerdown
 
 You can powerup/down your account with piston using:::
 
-    piston powerup "100 STEEM"
-    piston powerdown "10000 VESTS"
+    piston powerup "100 GOLOS"
+    piston powerdown "10000 GESTS"
 
 If ``--author``/``--to`` are not provided, the *default* account as defined with
 ``piston set author`` will be taken.
@@ -295,13 +295,13 @@ The take the following form::
     | Permission | Threshold |                                               Key/Account |
     +------------+-----------+-----------------------------------------------------------+
     |      owner |         2 |                                                fabian (1) |
-    |            |           | STM7mgtsF5XPU9tokFpEz2zN9sQ89oAcRfcaSkZLsiqfWMtRDNKkc (1) |
+    |            |           | GLS7mgtsF5XPU9tokFpEz2zN9sQ89oAcRfcaSkZLsiqfWMtRDNKkc (1) |
     +------------+-----------+-----------------------------------------------------------+
-    |     active |         1 | STM6quoHiVnmiDEXyz4fAsrNd28G6q7qBCitWbZGo4pTfQn8SwkzD (1) |
+    |     active |         1 | GLS6quoHiVnmiDEXyz4fAsrNd28G6q7qBCitWbZGo4pTfQn8SwkzD (1) |
     +------------+-----------+-----------------------------------------------------------+
     |    posting |         1 |                                             streemian (1) |
-    |            |           | STM6xpuUdyoRkRJ1GQmrHeNiVC3KGadjrBayo25HaTyBxBCQNwG3j (1) |
-    |            |           | STM8aJtoKdTsrRrWg3PB9XsbsCgZbVeDhQS3VUM1jkcXfVSjbv4T8 (1) |
+    |            |           | GLS6xpuUdyoRkRJ1GQmrHeNiVC3KGadjrBayo25HaTyBxBCQNwG3j (1) |
+    |            |           | GLS8aJtoKdTsrRrWg3PB9XsbsCgZbVeDhQS3VUM1jkcXfVSjbv4T8 (1) |
     +------------+-----------+-----------------------------------------------------------+
 
 The permissions are either **owner** (full control over the account),

@@ -477,7 +477,7 @@ def main() :
     parser_transfer.add_argument(
         'asset',
         type=str,
-        choices=["STEEM", "SBD"],
+        choices=["GOLOS", "GBG"],
         help='Asset to (i.e. STEEM or SDB)'
     )
     parser_transfer.add_argument(
@@ -1205,7 +1205,7 @@ def main() :
         ))
 
     elif args.command == "balance":
-        t = PrettyTable(["Account", "STEEM", "SBD", "VESTS", "VESTS (in STEEM)"])
+        t = PrettyTable(["Account", "GOLOS", "GBG", "GESTS", "VESTS (in STEEM)"])
         t.align = "r"
         if isinstance(args.account, str):
             args.account = [args.account]
@@ -1260,7 +1260,7 @@ def main() :
                 i["last_payment"],
                 "in %s" % strfage(i["next_payment_duration"]),
                 "%.1f%%" % i["interest_rate"],
-                "%.3f SBD" % i["interest"],
+                "%.3f GBG" % i["interest"],
             ])
         print(t)
 
@@ -1304,7 +1304,7 @@ def main() :
                     else :
                         print("Given Passphrases do not match!")
             memo_key = PasswordKey(args.account, pw, role="memo")
-            args.key  = format(memo_key.get_public_key(), "STM")
+            args.key  = format(memo_key.get_public_key(), "GLS")
             memo_privkey = memo_key.get_private_key()
             # Add the key to the wallet
             if not args.nobroadcast:
@@ -1343,9 +1343,9 @@ def main() :
         posting_key = PasswordKey(args.account, password, role="posting")
         active_key  = PasswordKey(args.account, password, role="active")
         memo_key    = PasswordKey(args.account, password, role="memo")
-        posting_pubkey = format(posting_key.get_public_key(), "STM")
-        active_pubkey  = format(active_key.get_public_key(), "STM")
-        memo_pubkey    = format(memo_key.get_public_key(), "STM")
+        posting_pubkey = format(posting_key.get_public_key(), "GLS")
+        active_pubkey  = format(active_key.get_public_key(), "GLS")
+        memo_pubkey    = format(memo_key.get_public_key(), "GLS")
 
         account = steem.rpc.get_account(args.account)
 

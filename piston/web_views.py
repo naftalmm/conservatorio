@@ -150,13 +150,13 @@ def showPrivateKeys(account):
     active_key_pub = None
     owner_key_pub = None
     if posting_key:
-        posting_key_pub = format(PrivateKey(posting_key).pubkey, "STM")
+        posting_key_pub = format(PrivateKey(posting_key).pubkey, "GLS")
     if memo_key:
-        memo_key_pub = format(PrivateKey(memo_key).pubkey, "STM")
+        memo_key_pub = format(PrivateKey(memo_key).pubkey, "GLS")
     if active_key:
-        active_key_pub = format(PrivateKey(active_key).pubkey, "STM")
+        active_key_pub = format(PrivateKey(active_key).pubkey, "GLS")
     if owner_key:
-        owner_key_pub = format(PrivateKey(owner_key).pubkey, "STM")
+        owner_key_pub = format(PrivateKey(owner_key).pubkey, "GLS")
 
     return render_template('wallet-keys.html', **locals())
 
@@ -183,7 +183,7 @@ def wallet():
                     import_accountpwd.password.data,
                     role
                 ).get_private_key()
-                pub = format(priv.pubkey, "STM")
+                pub = format(priv.pubkey, "GLS")
                 importName = steem.wallet.getAccountFromPublicKey(pub)
                 if importName:
                     configStore["web:user"] = importName
