@@ -7,6 +7,7 @@ import json
 from pprint import pprint
 from steembase.account import PrivateKey, PublicKey, Address
 import steembase.transactions as transactions
+from .__version__ import __VERSION__
 from .storage import configStorage as config
 from .utils import (
     resolveIdentifier,
@@ -21,7 +22,8 @@ from .ui import (
     markdownify,
     format_operation_details,
     confirm,
-    print_permissions
+    print_permissions,
+    get_terminal
 )
 from .steem import Steem, Post, SteemConnector
 import frontmatter
@@ -105,6 +107,9 @@ def main() :
         default=3,
         help='Verbosity'
     )
+    parser.add_argument('--version', action='version',
+                        version='%(prog)s {version}'.format(version=__VERSION__))
+
     subparsers = parser.add_subparsers(help='sub-command help')
 
     """
@@ -677,6 +682,7 @@ def main() :
     parser_allow.add_argument(
         'foreign_account',
         type=str,
+        nargs="?",
         help='The account or key that will be allowed to interact as your account'
     )
     parser_allow.add_argument(
@@ -822,6 +828,75 @@ def main() :
         type=str,
         default=config["web:host"],
         help='Host address to listen to'
+    )
+
+    """
+        Command "orderbook"
+    """
+    orderbook = subparsers.add_parser('orderbook', help='Obtain orderbook of the internal market')
+    orderbook.set_defaults(command="orderbook")
+    orderbook.add_argument(
+        '--chart',
+        action='store_true',
+        help="Enable charting (requires matplotlib)"
+    )
+
+    """
+        Command "buy"
+    """
+    parser_buy = subparsers.add_parser('buy', help='Buy GOLOS or GBG from the internal market')
+    parser_buy.set_defaults(command="buy")
+    parser_buy.add_argument(
+        'amount',
+        type=float,
+        help='Amount to buy'
+    )
+    parser_buy.add_argument(
+        'asset',
+        type=str,
+        choices=["GOLOS", "GBG"],
+        help='Asset to buy (i.e. GOLOS or GBG)'
+    )
+    parser_buy.add_argument(
+        'price',
+        type=float,
+        help='Limit buy price denoted in (GBG per GOLOS)'
+    )
+    parser_buy.add_argument(
+        '--account',
+        type=str,
+        required=False,
+        default=config["default_account"],
+        help='Buy with this account (defaults to "default_account")'
+    )
+
+    """
+        Command "sell"
+    """
+    parser_sell = subparsers.add_parser('sell', help='Sell GOLOS or GBG from the internal market')
+    parser_sell.set_defaults(command="sell")
+    parser_sell.add_argument(
+        'amount',
+        type=float,
+        help='Amount to sell'
+    )
+    parser_sell.add_argument(
+        'asset',
+        type=str,
+        choices=["GOLOS", "GBG"],
+        help='Asset to sell (i.e. GOLOS or GBG)'
+    )
+    parser_sell.add_argument(
+        'price',
+        type=float,
+        help='Limit sell price denoted in (GBG per GOLOS)'
+    )
+    parser_sell.add_argument(
+        '--account',
+        type=str,
+        required=False,
+        default=config["default_account"],
+        help='Sell from this account (defaults to "default_account")'
     )
 
     """
@@ -1269,6 +1344,10 @@ def main() :
         print_permissions(account)
 
     elif args.command == "allow":
+        if not args.foreign_account:
+            from steembase.account import PasswordKey
+            pwd = get_terminal(text="Password for Key Derivation: ", confirm=True)
+            args.foreign_account = format(PasswordKey(args.account, pwd, args.permission).get_public(), "GLS")
         pprint(steem.allow(
             args.foreign_account,
             weight=args.weight,
@@ -1289,21 +1368,8 @@ def main() :
         if not args.key:
             # Loop until both match
             from steembase.account import PasswordKey
-            import getpass
-            while True :
-                pw = getpass.getpass("Memo Key Passphrase: ")
-                if not pw:
-                    print("You cannot chosen an empty password!")
-                    continue
-                else:
-                    pwck = getpass.getpass(
-                        "Confirm Memo Key Passphrase: "
-                    )
-                    if (pw == pwck) :
-                        break
-                    else :
-                        print("Given Passphrases do not match!")
-            memo_key = PasswordKey(args.account, pw, role="memo")
+            pw = get_terminal(text="Password for Memo Key: ", confirm=True, allowedempty=False)
+            memo_key = PasswordKey(args.account, pw, "memo")
             args.key  = format(memo_key.get_public_key(), "GLS")
             memo_privkey = memo_key.get_private_key()
             # Add the key to the wallet
@@ -1398,6 +1464,87 @@ def main() :
                        num_retries=1)
         from . import web
         web.run(port=args.port, host=args.host)
+
+    elif args.command == "orderbook":
+        if args.chart:
+            try:
+                import numpy
+                import Gnuplot
+                from itertools import accumulate
+            except:
+                print("To use --chart, you need gnuplot and gnuplot-py installed")
+                sys.exit(1)
+        orderbook = steem.dex().returnOrderBook()
+
+        if args.chart:
+            g = Gnuplot.Gnuplot()
+            g.title("Steem internal market - GBG:GOLOS")
+            g.xlabel("price")
+            g.ylabel("volume")
+            g("""
+                set style data line
+                set term xterm
+                set border 15
+            """)
+            xbids = [x["price"] for x in orderbook["bids"]]
+            ybids = list(accumulate([x["gbg"] for x in orderbook["bids"]]))
+            dbids = Gnuplot.Data(xbids, ybids, with_="lines")
+            xasks = [x["price"] for x in orderbook["asks"]]
+            yasks = list(accumulate([x["gbg"] for x in orderbook["asks"]]))
+            dasks = Gnuplot.Data(xasks, yasks, with_="lines")
+            g("set terminal dumb")
+            g.plot(dbids, dasks)  # write SVG data directly to stdout ...
+
+        t = PrettyTable(["bid GBG", "sum bids GBG", "bid GOLOS", "sum bids GOLOS",
+                         "bid price", "+", "ask price",
+                         "ask GOLOS", "sum asks steem", "ask GBG", "sum asks GBG"])
+        t.align = "r"
+        bidssteem = 0
+        bidssbd = 0
+        askssteem = 0
+        askssbd = 0
+        for i, o in enumerate(orderbook["asks"]):
+            bidssbd += orderbook["bids"][i]["gbg"]
+            bidssteem += orderbook["bids"][i]["golos"]
+            askssbd += orderbook["asks"][i]["gbg"]
+            askssteem += orderbook["asks"][i]["golos"]
+            t.add_row([
+                "%.3f Ṩ" % orderbook["bids"][i]["gbg"],
+                "%.3f ∑" % bidssbd,
+                "%.3f ȿ" % orderbook["bids"][i]["golos"],
+                "%.3f ∑" % bidssteem,
+                "%.3f Ṩ/ȿ" % orderbook["bids"][i]["price"],
+                "|",
+                "%.3f Ṩ/ȿ" % orderbook["asks"][i]["price"],
+                "%.3f ȿ" % orderbook["asks"][i]["golos"],
+                "%.3f ∑" % askssteem,
+                "%.3f Ṩ" % orderbook["asks"][i]["gbg"],
+                "%.3f ∑" % askssbd])
+        print(t)
+
+    elif args.command == "buy":
+        if args.asset == "GBG":
+            price = 1.0 / args.price
+        else:
+            price = args.price
+        pprint(steem.buy(
+            args.amount,
+            args.asset,
+            price,
+            account=args.account
+        ))
+
+    elif args.command == "sell":
+        if args.asset == "GBG":
+            price = 1.0 / args.price
+        else:
+            price = args.price
+        pprint(steem.sell(
+            args.amount,
+            args.asset,
+            price,
+            account=args.account
+        ))
 
     else:
         print("No valid command given")
